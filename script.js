@@ -1,0 +1,110 @@
+document.addEventListener("DOMContentLoaded", function() {
+  const buttons = document.querySelectorAll('button, .nav-menu a');
+
+  buttons.forEach(btn => {
+    // animação ao passar o mouse
+    btn.addEventListener('mouseenter', () => {
+      btn.style.transition = 'all 0.3s ease';
+      btn.style.transform = 'scale(1.08)';
+      btn.style.boxShadow = '0 0 10px rgba(0, 255, 255, 0.6)';
+    });
+
+    // quando sai do botão
+    btn.addEventListener('mouseleave', () => {
+      btn.style.transform = 'scale(1)';
+      btn.style.boxShadow = 'none';
+    });
+
+    // efeito rápido ao clicar
+    btn.addEventListener('click', (e) => {
+      e.preventDefault(); // evita scroll instantâneo
+      const target = btn.getAttribute('href');
+      if(target && target.startsWith('#')){
+        document.querySelector(target).scrollIntoView({ behavior: 'smooth' });
+      }
+      btn.style.boxShadow = '0 0 15px rgba(255, 255, 255, 0.8)';
+      setTimeout(() => {
+        btn.style.boxShadow = 'none';
+      }, 200);
+    });
+  });
+
+  // Scroll seta para baixo
+  const scrollDown = document.getElementById('scrollDown');
+  scrollDown.addEventListener('click', () => {
+    document.querySelector('.about-section').scrollIntoView({ behavior: 'smooth' });
+  });
+});
+
+// script.js
+document.addEventListener('DOMContentLoaded', () => {
+  const imgs = document.querySelectorAll('.team-card img');
+
+  imgs.forEach(img => {
+    // pega os caminhos exatamente como escritos no HTML (evita URLs absolutas)
+    const originalSrc = img.getAttribute('src');
+    // tenta primeiro dataset no próprio <img>, se não existir tenta no .team-card pai
+    const hoverSrc = img.dataset.hover || img.closest('.team-card')?.dataset?.hover;
+
+    if (!hoverSrc) return; // se não tiver hover definido, pula
+
+    // pré-carrega a imagem de hover
+    const pre = new Image();
+    pre.src = hoverSrc;
+
+    // garante transição suave via JS caso CSS não tenha sido definido
+    img.style.transition = img.style.transition || 'opacity 0.35s ease, transform 0.35s ease';
+    img.style.willChange = 'opacity, transform';
+
+    let locked = false; // se true, mantém a imagem de hover (toggle via clique)
+    let showingHover = false;
+
+    const showHover = () => {
+      if (showingHover) return;
+      showingHover = true;
+      img.style.opacity = '0';
+      // espera a opacidade sumir, troca a src e reaparece
+      setTimeout(() => {
+        img.setAttribute('src', hoverSrc);
+        img.style.opacity = '1';
+      }, 220);
+    };
+
+    const hideHover = () => {
+      if (!showingHover) return;
+      showingHover = false;
+      img.style.opacity = '0';
+      setTimeout(() => {
+        img.setAttribute('src', originalSrc);
+        img.style.opacity = '1';
+      }, 220);
+    };
+
+    // hover (desktop)
+    img.addEventListener('mouseenter', () => {
+      showHover();
+    });
+
+    img.addEventListener('mouseleave', () => {
+      // se estiver "locked" por clique, não volta
+      if (!locked) hideHover();
+    });
+
+    // clique alterna estado (útil em mobile)
+    img.addEventListener('click', (e) => {
+      e.preventDefault();
+      locked = !locked;
+      if (locked) showHover();
+      else hideHover();
+    });
+
+    // toque rápido em mobile - mostra hover (não altera locked)
+    img.addEventListener('touchstart', () => {
+      showHover();
+    }, {passive: true});
+  });
+});
+
+function toggleMenu() {
+    document.querySelector('.nav-menu').classList.toggle('active');
+}
